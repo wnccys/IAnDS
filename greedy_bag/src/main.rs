@@ -1,5 +1,4 @@
-mod greedy;
-/// An optimal solution of greedy algorithm
+/// An optimal solution of a basic greedy algorithm
 
 struct Item {
     scr: f32,
@@ -40,8 +39,7 @@ fn quick_sort(ratio_slice: &mut [f32]) -> &mut [f32] {
     let mut piv_pos = 0;
     let mut curr = 1;
 
-    dbg!(&ratio_slice);
-
+    // O(n + (piv_pos..curr * n)) iteration
     while curr < ratio_slice.len() {
         let piv = ratio_slice[piv_pos];
 
@@ -53,10 +51,11 @@ fn quick_sort(ratio_slice: &mut [f32]) -> &mut [f32] {
         }
 
         curr += 1;
-        dbg!(&ratio_slice);
     }
+    dbg!(&ratio_slice);
 
-    todo!();
+    quick_sort(&mut ratio_slice[..piv_pos]);
+    quick_sort(&mut ratio_slice[piv_pos+1..]);
 
     ratio_slice
 }
@@ -75,5 +74,6 @@ fn l_shift<'a>(slc: &'a mut [f32], mut piv: f32, piv_pos: &mut usize, t_idx: usi
 }
 
 fn greed(n: &mut [f32]) -> &mut [f32] {
-    todo!()
+    dbg!(n);
+    todo!();
 }
