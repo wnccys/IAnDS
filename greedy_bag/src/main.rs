@@ -12,6 +12,10 @@ impl Item {
     fn as_ratio(&self) {
         println!("{}", self.scr / self.wgt);
     }
+
+    fn ratio(&self) -> f32 {
+        self.scr / self.wgt
+    }
 }
 
 
@@ -21,7 +25,7 @@ const SIZE: usize = 5;
 
 /// Weight limit of bag
 /// 
-const LIMIT: u16 = 25;
+const LIMIT: f32 = 25.0;
 
 fn main() {
     let mut bag: [Item; SIZE] = [
@@ -33,11 +37,9 @@ fn main() {
     ];
     quick_sort(&mut bag);
 
-    for n in bag.iter() {
-        println!("{:?}", n.scr / n.wgt);
-    }
+    for n in bag.iter() { println!("{:?}", n.scr / n.wgt); }
 
-    println!("{:?}", greed(&mut bag));
+    greed(&mut bag);
 }
 
 fn quick_sort(bag: &mut [Item]) {
@@ -75,21 +77,28 @@ fn l_shift<'a>(bag: &'a mut [Item], t_idx: &usize) {
     };
 }
 
-fn greed(bag: &mut [Item]) -> &mut [f32] {
-    let mut curr_cost = 0;
+fn greed(bag: &mut [Item]) {
+    let mut curr_cost: f32 = 0.0;
+    let mut percentages = [0.0; LIMIT as usize];
 
-    loop {
-        for item in bag.iter() {
-            if curr_cost > LIMIT { break }
+    for (idx, item) in bag.iter().enumerate() {
+        if curr_cost > LIMIT { break; }
 
-            match curr_cost {
-                n if curr_cost + n < LIMIT => { curr_cost += n }
-                n if curr_cost < LIMIT && curr_cost + n > LIMIT => {
+        match curr_cost {
+            _ if curr_cost + item.ratio() < LIMIT => { curr_cost += item.ratio(); percentages[idx] = 1.0 }
+            _ if curr_cost < LIMIT && curr_cost + item.ratio() > LIMIT => {
+                let percentage = ((LIMIT - curr_cost) * 100.0) / item.ratio();
 
-                }
-                _ => ()
+                curr_cost += (percentage / 100.0) * item.ratio();
+                percentages[idx] = percentage / 100.0;
             }
-
+            _ => ()
         }
+    }
+
+    for (idx, perc) in percentages.iter().enumerate() {
+        if *perc == 0.0 { continue }
+
+        println!("{} - {}", bag[idx].id, perc);
     }
 }
