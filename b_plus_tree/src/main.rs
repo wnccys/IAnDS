@@ -43,12 +43,19 @@ impl<'a> Root<'a> {
             .0
             .clone();
 
-        // TODO adjust leaf correctly
-        let l1 = [const { None }; MAX_LEAF_CAP];
-        let l2 = [const { None }; MAX_LEAF_CAP];
+        let mut l2 = Leaf { 0: [const { None }; MAX_LEAF_CAP], 1: None };
+        l2.0.clone_from_slice(&leaf.0[middle_idx + 1 ..]);
+
+        let mut l1 = Leaf { 0: [const { None }; MAX_LEAF_CAP], 1: None };
+        l1.0.clone_from_slice(&leaf.0[0..=middle_idx]);
 
         // Root is now internal!
-        let new_root = Internal::new(new_root_id, l1, l2);
+        let new_root = Internal::new(
+            new_root_id, 
+            l1,
+            l2
+        );
+
         self.0 = Some(Node::Internal(new_root));
     }
 
@@ -75,6 +82,7 @@ struct Internal<'a> {
     refs: [Option<(Key, Box<Node<'a>>)>; MAX_INTERNAL_CAP + 1]
 }
 
+// REVIEW new values ptrs
 impl<'a> Internal<'a> {
     fn new(id: usize, l1: Leaf<'a>, l2: Leaf<'a>) -> Self {
         let mut refs: _ = [ const { None } ; _];
@@ -105,6 +113,16 @@ impl<'a> Internal<'a> {
 /// 
 struct Leaf<'a>([Option<Data>; MAX_LEAF_CAP], Option<&'a [Option<Data>]>);
 impl Leaf<'_> {
+    fn new(data: Data) -> Self {
+        let mut items: [Option<Data>; MAX_LEAF_CAP] = [const { None }; MAX_LEAF_CAP];
+        items[0] = Some(data);
+        
+        Leaf {
+            0: items,
+            1: None
+        }
+    }
+
     fn insert(&mut self, data: Data) {
         let idx = self.0
         .iter()
@@ -124,18 +142,6 @@ impl Leaf<'_> {
 impl<'a> Into<Node<'a>> for Leaf<'a> {
     fn into(self) -> Node<'a> {
         Node::Leaf(self)
-    }
-}
-
-impl<'a> Leaf<'a> {
-    fn new(data: Data) -> Self {
-        let mut items: [Option<Data>; MAX_LEAF_CAP] = [const { None }; MAX_LEAF_CAP];
-        items[0] = Some(data);
-        
-        Leaf {
-            0: items,
-            1: None
-        }
     }
 }
 
