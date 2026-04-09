@@ -1,2 +1,2 @@
 # IAnDS
-implementations of some interestings algorithms and data stuctures
+implementations of some interestings algorithms and data structures
